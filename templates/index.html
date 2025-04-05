@@ -1,0 +1,111 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SteganoSecure | Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #0a0a0a;
+            color: #eee;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #00ffe0;
+        }
+        input, select, button, textarea {
+            margin: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            border: none;
+            font-size: 16px;
+        }
+        input, select, textarea {
+            width: 60%;
+            background: #1e1e1e;
+            color: #fff;
+        }
+        button {
+            background-color: #00ffe0;
+            color: #000;
+            cursor: pointer;
+        }
+        .section {
+            margin-top: 30px;
+            background: #121212;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px #00ffe0;
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        #decryptedMessage {
+            margin-top: 20px;
+            color: #0f0;
+            font-weight: bold;
+        }
+        .logout {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            background: #ff4d4d;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <form action="/logout" method="get">
+        <button class="logout">Logout</button>
+    </form>
+
+    <h1>Welcome to SteganoSecure</h1>
+
+    <div class="section">
+        <h2>🔐 Encrypt Message into Image</h2>
+        <form action="/encrypt" method="POST" enctype="multipart/form-data">
+            <input type="file" name="image" required><br>
+            <textarea name="message" placeholder="Enter secret message..." required></textarea><br>
+            <select name="recipient" required>
+                <option value="" disabled selected>Select recipient</option>
+                {% for user in users %}
+                    <option value="{{ user }}">{{ user }}</option>
+                {% endfor %}
+            </select><br>
+            <button type="submit">Encrypt & Download</button>
+        </form>
+    </div>
+
+    <div class="section">
+        <h2>🕵️ Decrypt Message from Image</h2>
+        <form id="decryptForm" method="POST" enctype="multipart/form-data">
+            <input type="file" name="image" required><br>
+            <button type="submit">Decrypt</button>
+        </form>
+        <div id="decryptedMessage"></div>
+    </div>
+
+    <script>
+        document.getElementById('decryptForm').onsubmit = async function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+
+            const response = await fetch('/decrypt', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            if (result.message) {
+                document.getElementById('decryptedMessage').innerText = 'Decrypted Message: ' + result.message;
+            } else {
+                document.getElementById('decryptedMessage').innerText = 'Error: ' + result.error;
+            }
+        };
+    </script>
+
+</body>
+</html>
